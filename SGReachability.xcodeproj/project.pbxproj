@@ -26,7 +26,6 @@
 /* Begin PBXFileReference section */
 		BB49E32417490EB900552133 /* libSGReachability.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSGReachability.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB49E32717490EB900552133 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		BB49E33517490EE800552133 /* SGReachability-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SGReachability-Prefix.pch"; sourceTree = "<group>"; };
 		BB49E33717490EE800552133 /* SGReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGReachability.h; sourceTree = "<group>"; };
 		BB49E33817490EE800552133 /* SGReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGReachability.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -46,7 +45,6 @@
 		BB49E31B17490EB900552133 = {
 			isa = PBXGroup;
 			children = (
-				BB49E33517490EE800552133 /* SGReachability-Prefix.pch */,
 				BB49E33617490EE800552133 /* src */,
 				BB49E32617490EB900552133 /* Frameworks */,
 				BB49E32517490EB900552133 /* Products */,
@@ -195,8 +193,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DSTROOT = /tmp/SGReachability.dst;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "SGReachability-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -207,8 +203,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DSTROOT = /tmp/SGReachability.dst;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "SGReachability-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -234,6 +228,7 @@
 				BB49E33417490EB900552133 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
