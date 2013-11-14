@@ -7,20 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <SystemConfiguration/SystemConfiguration.h>
 
-extern NSString * const kSGReachabilityChangedNotification;
+extern NSString * const SGReachabilityChangedNotification;
+extern NSString * const kSGReachabilityChangedNotificationFlagsKey;
 
 @interface SGReachability : NSObject
 
-@property (nonatomic, assign) dispatch_queue_t notificationsQueue; // defaults to main queue
+@property (nonatomic, readonly) SCNetworkReachabilityFlags flags;
 
 @property (nonatomic, readonly, getter = isReachable) BOOL reachable;
-
 @property (nonatomic, readonly, getter = isReachableViaWWAN) BOOL reachableViaWWAN;
 @property (nonatomic, readonly, getter = isReachableViaWiFi) BOOL reachableViaWiFi;
 
-- (id)initWithHostName:(NSString *)hostName;
+- (id)initWithNotificationsQueueOrNil:(NSOperationQueue *)notificationsQueue;
 
-+ (instancetype)internetReachability;
+- (id)initWithHostName:(NSString *)hostName
+notificationsQueueOrNil:(NSOperationQueue *)notificationsQueue;
+
++ (instancetype)mainQueueReachability;
 
 @end

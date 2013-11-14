@@ -7,14 +7,19 @@
 //
 
 #import "SGReachability.h"
-#import <SystemConfiguration/SystemConfiguration.h>
 #import <sys/socket.h>
 #import <netinet/in.h>
 
-NSString * const kSGReachabilityChangedNotification = @"SGReachabilityChangedNotification";
+NSString * const SGReachabilityChangedNotification = @"SGReachabilityChangedNotification";
+NSString * const kSGReachabilityChangedNotificationFlagsKey = @"SGReachabilityChangedNotificationFlagsKey";
+static NSString * const kSGReachabilityBackroundQueueNameTemplate = @"com.sanekgusev.SGReachability.%p";
 
 @interface SGReachability () {
     SCNetworkReachabilityRef _reachability;
+    SCNetworkReachabilityFlags _flags;
+    dispatch_queue_t _callbackQueue;
+    BOOL _receivedFlags;
+    NSOperationQueue *_notificationsQueue;
 }
 
 @end
@@ -26,46 +31,72 @@ NSString * const kSGReachabilityChangedNotification = @"SGReachabilityChangedNot
 #pragma mark - init/dealloc
 
 - (id)init {
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
+- (id)initWithReachability:(SCNetworkReachabilityRef)reachability
+   notificationsQueueOrNil:(NSOperationQueue *)notificationsQueue {
+    NSCParameterAssert(reachability);
+    if (!reachability) {
+        return nil;
+    }
     if (self = [super init]) {
-        struct sockaddr_in zeroAddress;
-        bzero(&zeroAddress, sizeof(zeroAddress));
-        zeroAddress.sin_len = sizeof(zeroAddress);
-        zeroAddress.sin_family = AF_INET;
-        _reachability = SCNetworkReachabilityCreateWithAddress(NULL, (const struct sockaddr*)&zeroAddress);
-        if(_reachability) {
-            [self setupCallback];
+        _reachability = CFRetain(reachability);
+        _notificationsQueue = notificationsQueue;
+        if (![self setupCallback]) {
+            CFRelease(_reachability);
+            return nil;
         }
-        else {
-            self = nil;
-        }
+        [self requestInitialFlags];
     }
     return self;
 }
 
-- (id)initWithHostName:(NSString *)hostName {
-    if (self = [super init]) {
-        _reachability = SCNetworkReachabilityCreateWithName(NULL, [hostName UTF8String]);
-        if(_reachability) {
-            [self setupCallback];
-        }
-        else {
-            self = nil;
-        }
+- (id)initWithNotificationsQueueOrNil:(NSOperationQueue *)notificationsQueue {
+    struct sockaddr_in zeroAddress;
+    memset(&zeroAddress, 0, sizeof(zeroAddress));
+    zeroAddress.sin_len = sizeof(zeroAddress);
+    zeroAddress.sin_family = AF_INET;
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithAddress(NULL,
+                                                                                   (const struct sockaddr*)&zeroAddress);
+    if (!reachability) {
+        return nil;
     }
+    self = [self initWithReachability:reachability
+              notificationsQueueOrNil:notificationsQueue];
+    CFRelease(reachability);
+    return self;
+}
+
+- (id)initWithHostName:(NSString *)hostName
+    notificationsQueueOrNil:(NSOperationQueue *)notificationsQueue {
+    NSCParameterAssert(hostName);
+    if (!hostName) {
+        return nil;
+    }
+    SCNetworkReachabilityRef reachability = SCNetworkReachabilityCreateWithName(NULL,
+                                                                                [hostName UTF8String]);
+    if (!reachability) {
+        return nil;
+    }
+    self = [self initWithReachability:reachability
+              notificationsQueueOrNil:notificationsQueue];
+    CFRelease(reachability);
     return self;
 }
 
 - (void)dealloc {
-    NSAssert(_reachability, @"_reachability should not be NULL");
     SCNetworkReachabilitySetCallback(_reachability, NULL, NULL);
-    self.notificationsQueue = NULL;
+    SCNetworkReachabilitySetDispatchQueue(_reachability, NULL);
     CFRelease(_reachability);
+    dispatch_release(_callbackQueue);
 }
 
 #pragma mark - public
 
-+ (instancetype)internetReachability {
-    return [[self alloc] init];
++ (instancetype)mainQueueReachability {
+    return [[self alloc] initWithNotificationsQueueOrNil:[NSOperationQueue mainQueue]];
 }
 
 #pragma mark - private
@@ -74,45 +105,79 @@ static void ReachabilityCallback(SCNetworkReachabilityRef target,
                                  SCNetworkReachabilityFlags flags,
                                  void* info) {
 	SGReachability* reachability = (__bridge SGReachability *)info;
-	[[NSNotificationCenter defaultCenter] postNotificationName:kSGReachabilityChangedNotification
-                                                        object:reachability];
+    reachability->_flags = flags;
+    if (reachability->_notificationsQueue) {
+        [reachability->_notificationsQueue addOperationWithBlock:^{
+            [[NSNotificationCenter defaultCenter] postNotificationName:SGReachabilityChangedNotification
+                                                                object:reachability
+                                                              userInfo:@{kSGReachabilityChangedNotificationFlagsKey:
+                                                                             @(flags)}];
+        }];
+    }
 }
 
-- (void)setupCallback {
-    NSAssert(_reachability, @"_reachability should not be NULL");
+- (BOOL)setupCallback {
     SCNetworkReachabilityContext context = {0, (__bridge void *)(self), NULL, NULL, NULL};
     if (SCNetworkReachabilitySetCallback(_reachability,
                                          ReachabilityCallback,
                                          &context)) {
-        self.notificationsQueue = dispatch_get_main_queue();
+        const char * queueName = [[NSString stringWithFormat:kSGReachabilityBackroundQueueNameTemplate, self]
+                                  UTF8String];
+        _callbackQueue = dispatch_queue_create(queueName, 0);
+        if (SCNetworkReachabilitySetDispatchQueue(_reachability, _callbackQueue)) {
+            return YES;
+        }
     }
+    return NO;
+}
+
+- (void)requestInitialFlags {
+    dispatch_async(_callbackQueue, ^{
+        SCNetworkReachabilityGetFlags(_reachability, &_flags);
+        _receivedFlags = YES;
+    });
+}
+
+- (BOOL)isReachableWithCheckBlock:(BOOL(^)(SCNetworkReachabilityFlags flags))block {
+    __block BOOL reachable = YES;
+    dispatch_sync(_callbackQueue, ^{
+        if (_receivedFlags) {
+            reachable = block(_flags);
+        }
+    });
+    return reachable;
 }
 
 #pragma mark - properties
 
-- (void)setNotificationsQueue:(dispatch_queue_t)notificationsQueue {
-    _notificationsQueue = notificationsQueue;
-    SCNetworkReachabilitySetDispatchQueue(_reachability, _notificationsQueue);
+- (SCNetworkReachabilityFlags)flags {
+    __block SCNetworkReachabilityFlags flags;
+    dispatch_sync(_callbackQueue, ^{
+        if (_receivedFlags) {
+            flags = _flags;
+        }
+    });
+    return flags;
 }
 
 - (BOOL)isReachable {
-    SCNetworkReachabilityFlags flags;
-    Boolean success = SCNetworkReachabilityGetFlags(_reachability, &flags);
-    return !success || ((flags & kSCNetworkReachabilityFlagsReachable) != 0);
+    return [self isReachableWithCheckBlock:^BOOL(SCNetworkReachabilityFlags flags) {
+        return (flags & kSCNetworkReachabilityFlagsReachable) != 0;
+    }];
 }
 
 - (BOOL)isReachableViaWWAN {
-    SCNetworkReachabilityFlags flags;
-    Boolean success = SCNetworkReachabilityGetFlags(_reachability, &flags);
-    return !success || (((flags & kSCNetworkReachabilityFlagsReachable) != 0) &&
-                        ((flags & kSCNetworkReachabilityFlagsIsWWAN) != 0));
+    return [self isReachableWithCheckBlock:^BOOL(SCNetworkReachabilityFlags flags) {
+        return ((flags & kSCNetworkReachabilityFlagsReachable) != 0) &&
+            ((flags & kSCNetworkReachabilityFlagsIsWWAN) != 0);
+    }];
 }
 
 - (BOOL)isReachableViaWiFi {
-    SCNetworkReachabilityFlags flags;
-    Boolean success = SCNetworkReachabilityGetFlags(_reachability, &flags);
-    return !success || (((flags & kSCNetworkReachabilityFlagsReachable) != 0) &&
-                        ((flags & kSCNetworkReachabilityFlagsIsWWAN) == 0));
+    return [self isReachableWithCheckBlock:^BOOL(SCNetworkReachabilityFlags flags) {
+        return ((flags & kSCNetworkReachabilityFlagsReachable) != 0) &&
+            ((flags & kSCNetworkReachabilityFlagsIsWWAN) == 0);
+    }];
 }
 
 @end
