@@ -1,4 +1,4 @@
-SGReachability
+SGVReachability
 ==============
 
 Simple reachability wrapper for iOS.
