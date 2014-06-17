@@ -24,7 +24,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		BB49E32417490EB900552133 /* libSGReachability.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSGReachability.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB49E32417490EB900552133 /* libSGVReachability.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSGVReachability.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB49E32717490EB900552133 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		BB49E33717490EE800552133 /* SGVReachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SGVReachability.h; sourceTree = "<group>"; };
 		BB49E33817490EE800552133 /* SGVReachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SGVReachability.m; sourceTree = "<group>"; };
@@ -54,7 +54,7 @@
 		BB49E32517490EB900552133 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				BB49E32417490EB900552133 /* libSGReachability.a */,
+				BB49E32417490EB900552133 /* libSGVReachability.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,9 +79,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		BB49E32317490EB900552133 /* SGReachability */ = {
+		BB49E32317490EB900552133 /* SGVReachability */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = BB49E33217490EB900552133 /* Build configuration list for PBXNativeTarget "SGReachability" */;
+			buildConfigurationList = BB49E33217490EB900552133 /* Build configuration list for PBXNativeTarget "SGVReachability" */;
 			buildPhases = (
 				BB49E32017490EB900552133 /* Sources */,
 				BB49E32117490EB900552133 /* Frameworks */,
@@ -91,9 +91,9 @@
 			);
 			dependencies = (
 			);
-			name = SGReachability;
+			name = SGVReachability;
 			productName = SGReachability;
-			productReference = BB49E32417490EB900552133 /* libSGReachability.a */;
+			productReference = BB49E32417490EB900552133 /* libSGVReachability.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -105,7 +105,7 @@
 				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = sanekgusev;
 			};
-			buildConfigurationList = BB49E31F17490EB900552133 /* Build configuration list for PBXProject "SGReachability" */;
+			buildConfigurationList = BB49E31F17490EB900552133 /* Build configuration list for PBXProject "SGVReachability" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -117,7 +117,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				BB49E32317490EB900552133 /* SGReachability */,
+				BB49E32317490EB900552133 /* SGVReachability */,
 			);
 		};
 /* End PBXProject section */
@@ -248,7 +248,7 @@
 			buildSettings = {
 				DSTROOT = /tmp/SGReachability.dst;
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = SGVReachability;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -258,7 +258,7 @@
 			buildSettings = {
 				DSTROOT = /tmp/SGReachability.dst;
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = SGVReachability;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -266,7 +266,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		BB49E31F17490EB900552133 /* Build configuration list for PBXProject "SGReachability" */ = {
+		BB49E31F17490EB900552133 /* Build configuration list for PBXProject "SGVReachability" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BB49E33017490EB900552133 /* Debug */,
@@ -275,7 +275,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		BB49E33217490EB900552133 /* Build configuration list for PBXNativeTarget "SGReachability" */ = {
+		BB49E33217490EB900552133 /* Build configuration list for PBXNativeTarget "SGVReachability" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				BB49E33317490EB900552133 /* Debug */,
