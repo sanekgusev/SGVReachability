@@ -113,7 +113,7 @@ static NSString * const kSGVReachabilityFlagsAccessQueueNameTemplate = @"com.san
 static void SGVReachabilityChangedCallback(SCNetworkReachabilityRef target,
                                            SCNetworkReachabilityFlags flags,
                                            void* info) {
-	SGVReachability* reachability = (__bridge SGVReachability *)info;
+    SGVReachability* reachability = (__bridge SGVReachability *)info;
     [reachability updateFlagsFromFlags:flags];
     void (^notificationBlock)(void) = ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:SGVReachabilityChangedNotification

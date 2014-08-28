@@ -49,7 +49,10 @@
 				BB49E32617490EB900552133 /* Frameworks */,
 				BB49E32517490EB900552133 /* Products */,
 			);
+			indentWidth = 4;
 			sourceTree = "<group>";
+			tabWidth = 4;
+			usesTabs = 0;
 		};
 		BB49E32517490EB900552133 /* Products */ = {
 			isa = PBXGroup;
