@@ -105,7 +105,12 @@ static NSString * const kSGVReachabilityFlagsAccessQueueNameTemplate = @"com.san
 #pragma mark - public
 
 + (instancetype)mainQueueReachability {
-    return [[self alloc] initWithNotificationsQueue:[NSOperationQueue mainQueue]];
+    static SGVReachability *mainQueueReachability;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        mainQueueReachability = [[self alloc] initWithNotificationsQueue:[NSOperationQueue mainQueue]];
+    });
+    return mainQueueReachability;
 }
 
 #pragma mark - private
