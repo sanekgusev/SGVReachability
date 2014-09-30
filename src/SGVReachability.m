@@ -184,7 +184,7 @@ static void SGVReachabilityChangedCallback(SCNetworkReachabilityRef target,
 #pragma mark - properties
 
 - (SCNetworkReachabilityFlags)flags {
-    __block SCNetworkReachabilityFlags resultFlags;
+    __block SCNetworkReachabilityFlags resultFlags = (SCNetworkReachabilityFlags)0;
     [self isReachableWithCheckBlock:^BOOL(SCNetworkReachabilityFlags flags) {
         resultFlags = flags;
         return YES;
