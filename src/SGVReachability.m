@@ -105,7 +105,12 @@ static NSString * const kSGVReachabilityFlagsAccessQueueNameTemplate = @"com.san
 #pragma mark - public
 
 + (instancetype)mainQueueReachability {
-    return [[self alloc] initWithNotificationsQueue:[NSOperationQueue mainQueue]];
+    static SGVReachability *mainQueueReachability;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        mainQueueReachability = [[self alloc] initWithNotificationsQueue:[NSOperationQueue mainQueue]];
+    });
+    return mainQueueReachability;
 }
 
 #pragma mark - private
@@ -113,7 +118,7 @@ static NSString * const kSGVReachabilityFlagsAccessQueueNameTemplate = @"com.san
 static void SGVReachabilityChangedCallback(SCNetworkReachabilityRef target,
                                            SCNetworkReachabilityFlags flags,
                                            void* info) {
-	SGVReachability* reachability = (__bridge SGVReachability *)info;
+    SGVReachability* reachability = (__bridge SGVReachability *)info;
     [reachability updateFlagsFromFlags:flags];
     void (^notificationBlock)(void) = ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:SGVReachabilityChangedNotification
@@ -184,7 +189,7 @@ static void SGVReachabilityChangedCallback(SCNetworkReachabilityRef target,
 #pragma mark - properties
 
 - (SCNetworkReachabilityFlags)flags {
-    __block SCNetworkReachabilityFlags resultFlags;
+    __block SCNetworkReachabilityFlags resultFlags = (SCNetworkReachabilityFlags)0;
     [self isReachableWithCheckBlock:^BOOL(SCNetworkReachabilityFlags flags) {
         resultFlags = flags;
         return YES;
